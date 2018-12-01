@@ -1,49 +1,142 @@
+import java.util.Arrays;
+import java.util.Scanner;
 public class FracCalc {
-
-    /**
-     * Prompts user for input, passes that input to produceAnswer, then outputs the result.
-     * @param args - unused
-     */
     public static void main(String[] args) 
     {
-        // TODO: Read the input from the user and call produceAnswer with an equation
-        // Checkpoint 1: Create a Scanner, read one line of input, pass that input to produceAnswer, print the result.
-        // Checkpoint 2: Accept user input multiple times.
+    	Scanner feed = new Scanner(System.in);
+    	String input;
+    	
+        while(true)
+        {
+        	System.out.println("Enter a basic arithmetic expression.\n"
+        			+ "(use - + / * for arithmetic operators, and _ to separate parts of a mixed fraction.)");
+        	input = feed.nextLine();
+        	//exit loop on "quit" command
+        	if(input.equals("quit")) break;
+        	//Print the answer
+        	System.out.println("Solution: "+produceAnswer(input));
+        }
+        feed.close();
     }
     
-    /**
-     * produceAnswer - This function takes a String 'input' and produces the result.
-     * @param input - A fraction string that needs to be evaluated.  For your program, this will be the user input.
-     *      Example: input ==> "1/2 + 3/4"
-     * @return the result of the fraction after it has been calculated.
-     *      Example: return ==> "1_1/4"
-     */
     public static String produceAnswer(String input)
-    { 
-        // TODO: Implement this function to produce the solution to the input
-        // Checkpoint 1: Return the second operand.  Example "4/5 * 1_2/4" returns "1_2/4".
-        // Checkpoint 2: Return the second operand as a string representing each part.
-        //               Example "4/5 * 1_2/4" returns "whole:1 numerator:2 denominator:4".
-        // Checkpoint 3: Evaluate the formula and return the result as a fraction.
-        //               Example "4/5 * 1_2/4" returns "6/5".
-        //               Note: Answer does not need to be reduced, but it must be correct.
-        // Final project: All answers must be reduced.
-        //               Example "4/5 * 1_2/4" returns "1_1/5".
-        
-        return "";
-    }
+    {
+    	//If the input is not formatted as expected, return an error message
+    	if(!input.matches("^-?[0-9]+((_[0-9]+/[1-9][0-9]*)|(/[1-9][0-9]*))? [\\-\\/*+] -?[0-9]+((_[0-9]+/[1-9][0-9]*)|(/[1-9][0-9]*))?$")) return "error: invalid entry";
+    	
+    	//Split the input into the first operand, the operator, and the second operand
+    	String[] pieces = input.split(" ");
+    	
+    	
+    	//		Parsing first operand
+    	
+    	//Split the number into its separate parts
+    	String[] arg1string = pieces[0].split("[\\/_]");
+    	//Convert to integers
+    	int[] arg1 = new int[arg1string.length];
+    	for(int i=0;i<arg1string.length;i++)
+    	{
+    		arg1[i] = Integer.parseInt(arg1string[i]);
+    	}
+    	//Convert to numerator and denominator
+    	int numerator1;
+    	int denominator1 = 1;
+    	switch(arg1.length)
+    	{
+    	case 3:
+    		if(arg1[0]<0) arg1[1] *= -1;
+    		numerator1 = arg1[0]*arg1[2]+arg1[1];
+    		denominator1 = arg1[2];
+    		break;
+    	case 2:
+    		numerator1 = arg1[0];
+    		denominator1 = arg1[1];
+    		break;
+    	default:
+    		numerator1 = arg1[0];
+    	}
+    	
+    	
+    	//		Parsing second operand
 
-    // TODO: Fill in the space below with helper methods
+    	//Split the number into its separate parts
+    	String[] arg2string = pieces[2].split("[\\/_]");
+    	//Convert to integers
+    	int[] arg2 = new int[arg2string.length];
+    	for(int i=0;i<arg2string.length;i++)
+    	{
+    		arg2[i] = Integer.parseInt(arg2string[i]);
+    	}
+    	//Convert to numerator and denominator
+    	int numerator2;
+    	int denominator2 = 1;
+    	switch(arg2.length)
+    	{
+    	case 3:
+    		if(arg2[0]<0) arg2[1] *= -1;
+    		numerator2 = arg2[0]*arg2[2]+arg2[1];
+    		denominator2 = arg2[2];
+    		break;
+    	case 2:
+    		numerator2 = arg2[0];
+    		denominator2 = arg2[1];
+    		break;
+    	default:
+    		numerator2 = arg2[0];
+    	}
+    	
+    	//Print debug info
+    	/*
+    	System.out.println("expression broken down"+Arrays.toString(pieces));
+    	System.out.println("arg1 broken down: "+numerator1+" / "+denominator1);
+    	System.out.println("arg2 broken down: "+numerator2+" / "+denominator2);
+    	*/
+    	
+    	
+    	//		Performing calculations
+    	
+    	int numerator3 = 0;
+    	int denominator3 = 1;
+    	
+    	switch(pieces[1].charAt(0))
+    	{
+    	//Multiplication
+    	case '*':
+    		numerator3 = numerator1*numerator2;
+    		denominator3 = denominator1*denominator2;
+    		break;
+    	//Division
+    	case '/':
+    		if(numerator2==0) return "error: divide by 0";
+    		numerator3 = numerator1*denominator2;
+    		denominator3 = denominator1*numerator2;
+    		break;
+    	//Subtraction
+    	case '-':
+    		numerator2 *= -1;
+    	//Addition
+    	case '+':
+    		numerator3 = numerator1*denominator2+numerator2*denominator1;
+    		denominator3 = denominator1*denominator2;
+    		
+    	}
+    	
+    	
+    	//		Formatting output
+    	
+    	//Reduce the fraction
+    	int factor = gcd(numerator3,denominator3);
+    	numerator3 /= factor;
+    	denominator3 /= factor;
+    	//Whole number result
+    	if(denominator3 == 1) return numerator3+"";
+    	//Mixed fraction result
+    	if(denominator3 < numerator3) return numerator3 / denominator3 + "_" + numerator3 % denominator3 + "/" + denominator3;
+        //Proper fraction result
+    	return numerator3+"/"+denominator3;
+    }
     
-    /**
-     * greatestCommonDivisor - Find the largest integer that evenly divides two integers.
-     *      Use this helper method in the Final Checkpoint to reduce fractions.
-     *      Note: There is a different (recursive) implementation in BJP Chapter 12.
-     * @param a - First integer.
-     * @param b - Second integer.
-     * @return The GCD.
-     */
-    public static int greatestCommonDivisor(int a, int b)
+    public static int gcd(int a, int b)
     {
         a = Math.abs(a);
         b = Math.abs(b);
@@ -57,16 +150,9 @@ public class FracCalc {
         return max;
     }
     
-    /**
-     * leastCommonMultiple - Find the smallest integer that can be evenly divided by two integers.
-     *      Use this helper method in Checkpoint 3 to evaluate expressions.
-     * @param a - First integer.
-     * @param b - Second integer.
-     * @return The LCM.
-     */
-    public static int leastCommonMultiple(int a, int b)
+    public static int lcm(int a, int b)
     {
-        int gcd = greatestCommonDivisor(a, b);
+        int gcd = gcd(a, b);
         return (a*b)/gcd;
     }
 }
