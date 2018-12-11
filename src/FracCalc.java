@@ -9,7 +9,8 @@ public class FracCalc {
         while(true)
         {
         	System.out.println("Enter a basic arithmetic expression.\n"
-        			+ "(use - + / * for arithmetic operators, and _ to separate parts of a mixed fraction.)");
+        			+ "(use - + / * for arithmetic operators, and _ to separate parts of a mixed fraction.\n"
+        			+ "Use spaces to separate the values and the operator.)");
         	input = feed.nextLine();
         	//exit loop on "quit" command
         	if(input.equals("quit")) break;
@@ -128,10 +129,15 @@ public class FracCalc {
     	int factor = gcd(numerator3,denominator3);
     	numerator3 /= factor;
     	denominator3 /= factor;
+    	if(denominator3<0) 
+		{
+			numerator3 *=-1;
+			denominator3 *=-1;
+		}
     	//Whole number result
     	if(denominator3 == 1) return numerator3+"";
     	//Mixed fraction result
-    	if(denominator3 < numerator3) return numerator3 / denominator3 + "_" + numerator3 % denominator3 + "/" + denominator3;
+    	if(denominator3 < Math.abs(numerator3)) return numerator3 / denominator3 + "_" + Math.abs(numerator3 % denominator3) + "/" + denominator3;
         //Proper fraction result
     	return numerator3+"/"+denominator3;
     }
